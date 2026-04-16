@@ -11,6 +11,9 @@ Basic VPN toggle placeholder
 Basic firewall toggle placeholder
 Command execution endpoint (/run if enabled)
 Desktop launcher integration (optional)
+
+
+
 Architecture
 [ Browser UI (index.html) ]
             ↓ HTTP (fetch)
@@ -21,6 +24,9 @@ Architecture
 [ Chromium Launcher (subprocess flags) ]
             ↓
 [ System Layer (OS / network tools optional) ]
+
+
+
 Data Flow
 User clicks toggle
 → UI sends request (/set/incognito/on)
