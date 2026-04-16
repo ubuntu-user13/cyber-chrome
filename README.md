@@ -35,7 +35,15 @@ It does not modify Chromium source code. It operates as a launch-layer configura
 ---
 
 ## Installation
+## Windows Setup
 
+1. Install Google Chrome
+2. Download this repo
+3. Run:
+ Double-click:
+cyber-chrome.bat
+
+##linux deb     
 ```bash
 git clone https://github.com/ubuntu-user13/cyber-chrome
 cd cyber-chrome
