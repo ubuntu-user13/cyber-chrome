@@ -43,7 +43,7 @@ It does not modify Chromium source code. It operates as a launch-layer configura
  Double-click:
 cyber-chrome.bat
 ---
-##linux
+linux
 ```bash
 git clone https://github.com/ubuntu-user13/cyber-chrome
 cd cyber-chrome
