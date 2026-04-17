@@ -1,281 +1,126 @@
-# Cyber Panel — Complete README
+Cyber Panel — Complete README (Rewritten)
+Overview
 
----
+Cyber Panel is a local browser control system built around a Python HTTP backend and a web UI. It manages Chromium launch behavior through persistent settings and runtime flags.
 
-## Overview
+It is designed for local automation of browser startup configurations.
 
-Cyber Panel is a local control interface for managing Chromium behavior through a web-based UI and a Python backend. It allows toggling browser settings, persisting configuration, and relaunching Chromium with specific runtime flags.
-
----
-
-## Core Features
-
-* Chromium launch control via flags
-* Incognito mode toggle (`--incognito`)
-* GPU disable (`--disable-gpu`)
-* WebRTC disable (`--disable-webrtc`)
-* Persistent settings storage (`/tmp/cyber-state.json`)
-* Apply + relaunch browser
-* Local web UI (`/ui`)
-* HTTP API for control
-* Desktop launcher support (optional)
-
----
-
-## Architecture
-
-```
-[ UI (index.html) ]
-        ↓ HTTP (fetch)
-[ Backend (server.py :8080) ]
-        ↓
-[ State (/tmp/cyber-state.json) ]
-        ↓
-[ Chromium Launcher (flags) ]
-        ↓
-[ OS / System Layer ]
-```
-
----
-
-## File Structure
-
-```
+Core Features
+Chromium launch control via command-line flags
+Persistent configuration storage (~/.cyber-state.json)
+Incognito mode toggle (--incognito)
+GPU disable toggle (--disable-gpu)
+WebRTC disable toggle (--disable-webrtc)
+Apply-and-relaunch workflow
+Local web interface (/ui)
+Lightweight HTTP API (localhost-only)
+Architecture
+UI (index.html)
+      ↓ HTTP requests
+Backend (server.py :8080)
+      ↓
+State Store (~/.cyber-state.json)
+      ↓
+Flag Builder
+      ↓
+Chromium Process Launcher
+      ↓
+Operating System
+File Structure
 ~/cyber-backend/server.py
 ~/cyber-ui/index.html
-~/cyber-ui-launch.sh
-~/.local/share/applications/cyber-chromium.desktop
-```
-
----
-
-## Installation
-
-### 1. Install dependencies
-
-```
+~/cyber-launch.sh
+~/.cyber-state.json
+Installation
+1. Dependencies
 sudo apt update
 sudo apt install chromium-browser python3
-```
-
----
-
-### 2. Run backend
-
-```
-sudo python3 ~/cyber-backend/server.py
-```
-
----
-
-### 3. Open UI
-
-```
+2. Run backend
+python3 ~/cyber-backend/server.py
+3. Open UI
 chromium-browser http://127.0.0.1:8080/ui
-```
+Usage
+Toggle settings
 
----
+Format:
 
-## Usage
-
-### Toggle settings
-
-```
 /set/<key>/<on|off>
-```
 
-Example:
+Examples:
 
-```
-/set/incognito/on
-/set/gpu/off
-/set/webrtc/off
-```
-
----
-
-### Apply settings
-
-```
-/apply
-```
-
-Effect:
-
-* Relaunches Chromium
-* Applies flags based on stored state
-
----
-
-## Supported Settings
-
-| Setting   | Effect                      |
-| --------- | --------------------------- |
-| incognito | `--incognito`               |
-| gpu       | `--disable-gpu` (if off)    |
-| webrtc    | `--disable-webrtc` (if off) |
-
----
-
-## API Endpoints
-
-```
-GET /ui                      → Load UI
-GET /set/<key>/<on|off>      → Update setting
-GET /apply                   → Apply + relaunch
-```
-
----
-
-## Example Requests
-
-```
 curl http://127.0.0.1:8080/set/incognito/on
+curl http://127.0.0.1:8080/set/gpu/off
+curl http://127.0.0.1:8080/set/webrtc/off
+Apply configuration
 curl http://127.0.0.1:8080/apply
-```
 
----
+Behavior:
 
-## Data Flow
-
-```
-User click
-→ /set request
-→ state saved
-→ /apply
-→ flags built
+Terminates running Chromium session
+Rebuilds flags from stored state
+Launches new Chromium instance
+Supported Settings
+Setting	Effect
+incognito	Enables --incognito
+gpu	Disables GPU when off
+webrtc	Disables WebRTC when off
+API Endpoints
+GET /ui
+GET /state
+GET /set/<key>/<on|off>
+GET /apply
+Data Flow
+User input
+→ HTTP request (/set)
+→ State updated
+→ Saved to disk
+→ /apply triggered
+→ Flags generated
 → Chromium relaunched
-→ UI reload
-```
-
----
-
-## Launcher Script (optional)
-
-```
+Launcher Script
 #!/usr/bin/env bash
+
 python3 ~/cyber-backend/server.py &
 sleep 1
 chromium-browser http://127.0.0.1:8080/ui
-```
-
----
-
-## Desktop App (optional)
-
-File:
-
-```
-~/.local/share/applications/cyber-chromium.desktop
-```
-
-```
+Desktop Entry (Linux)
 [Desktop Entry]
 Name=Cyber Panel
-Exec=/bin/bash -c "$HOME/cyber-ui-launch.sh"
-Icon=utilities-terminal
+Exec=/bin/bash -c "$HOME/cyber-launch.sh"
+Icon=chromium
 Type=Application
 Categories=Network;System;
 Terminal=false
-```
-
----
-
-## Troubleshooting
-
-### Check backend
-
-```
+Troubleshooting
+Backend not responding
 ss -tulnp | grep 8080
-```
-
----
-
-### Kill port
-
-```
+Kill stuck process
 sudo fuser -k 8080/tcp
-```
-
----
-
-### Test API
-
-```
-curl http://127.0.0.1:8080/set/incognito/on
-```
-
----
-
-### Common Issues
-
-* UI shows “error” → backend not running or wrong URL
-* No effect → forgot to press APPLY
-* App not showing → invalid `.desktop` file
-* Port in use → kill process on 8080
-
----
-
-## Limitations
-
-* Requires browser relaunch for changes
-* Some toggles are placeholders
-* No authentication
-* Localhost only
-* No runtime Chromium modification
-
----
-
-## Useful URLs
-
-* UI:
-
-```
-http://127.0.0.1:8080/ui
-```
-
-* Example API:
-
-```
-http://127.0.0.1:8080/set/incognito/on
-http://127.0.0.1:8080/apply
-```
-
----
-
-## External Documentation
-
-* Chromium flags reference:
-
-```
+Test API
+curl http://127.0.0.1:8080/state
+Common Issues
+UI shows error → backend not running
+Settings not applied → /apply not called
+App not visible → broken .desktop file
+Port conflict → 8080 already in use
+Limitations
+Requires Chromium restart for changes
+Local-only (no authentication layer)
+Flag system depends on Chromium CLI behavior
+No hot-reload of browser state
+Useful Links
+Chromium flags:
 https://peter.sh/experiments/chromium-command-line-switches/
-```
-
-* Python HTTP server:
-
-```
+Python HTTP server:
 https://docs.python.org/3/library/http.server.html
-```
-
-* WireGuard (if used later):
-
-```
+WireGuard reference (optional future expansion):
 https://www.wireguard.com/quickstart/
-```
+Summary
 
----
+Cyber Panel is a local browser automation layer.
 
-## Summary
+Pipeline:
 
-Cyber Panel provides:
+UI → API → State → Flag Builder → Chromium Launch
 
-* Local control UI
-* Backend API
-* Persistent settings
-* Chromium launch control
-
-System model:
-
-```
-UI → API → State → Flags → Browser Relaunch
-```
+It provides deterministic control over Chromium startup behavior via a simple HTTP interface.
